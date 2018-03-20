@@ -1,0 +1,43 @@
+SELECT
+	cph.PONo,
+	cpl.ItemNo,
+	CAST (
+		cpl.Quantity AS DECIMAL (10, 2)
+	) AS "Order Quantity",
+	CAST (
+		csn.Quantity AS DECIMAL (10, 2)
+	) AS "Shipped Quantity",
+	FORMAT (
+		cph.PODate,
+		'MM/dd/yyyy'
+	) AS "Order Date",
+	FORMAT (
+		cph.OriginalReqShipDateFrom,
+		'MM/dd/yyyy'
+	) AS "Request ETD",
+	FORMAT (
+		cph.CommitReqShipDateFrom,
+		'MM/dd/yyyy'
+	) AS "Confirm ETD",
+	FORMAT (
+		sh.[Shipment Date],
+		'MM/dd/yyyy'
+	) AS 'Actual ETD',
+	csn.[SO No_],
+	DATEDIFF(
+		DAY,
+		cph.CommitReqShipDateFrom,
+		sh.[Shipment Date]
+	) AS "Delay"
+FROM
+	[dbo].[SAN LIM FURNITURE VIETNAM LTD$CustPO Shipment NEW] csn
+JOIN [dbo].[SAN LIM FURNITURE VIETNAM LTD$Sales Header] sh ON sh.No_ = csn.[SO No_]
+JOIN [dbo].[SAN LIM FURNITURE VIETNAM LTD$CustPOLine] cpl ON csn.[CustPO No_] = cpl.PONo
+AND csn.[Item No_] = cpl.ItemNo
+JOIN [dbo].[SAN LIM FURNITURE VIETNAM LTD$CustPOHeader] cph ON cpl.PONo = cph.PONo
+WHERE
+	csn.CustNo = 'C54000'
+AND csn.Quantity > 0
+ORDER BY
+	cph.PONo,
+	cpl.ItemNo ASC
